@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h2>👨‍⚕️ Patient Dashboard</h2>
+            <a class="btn primary" href="{% url 'patient_create' %}">
+                <i class="fa fa-user-plus"></i> Add Patient
+            </a>
+        </header>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in patients %}
+                    <tr>
+                        <td>{{ p.user }}</td>
+                        <td>{{ p.age }}</td>
+                        <td>{{ p.gender }}</td>
+                        <td>{{ p.phone }}</td>
+                        <td>{{ p.address }}</td>
+                        <td>
+                            <a class="btn icon edit" href="{% url 'patient_update' p.id %}">
+                                <i class="fa fa-pen"></i>
+                            </a>
+                            <a class="btn icon delete" href="{% url 'patient_delete' p.id %}">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">No patients found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
