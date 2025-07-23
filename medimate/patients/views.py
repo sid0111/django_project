@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .models import PatientProfile
+from patients.forms import AppointmentForm
+
+from .models import Appointment, PatientProfile
 
 def patient_list(request):
     patients = PatientProfile.objects.all()
@@ -35,3 +37,17 @@ def patient_delete(request, id):
     pat.delete()
     return redirect('patient_list')
     
+
+def appointment_list(request):
+    appointments = Appointment.objects.all()
+    return render(request, 'appointment_list.html', {'appointments': appointments})
+
+def appointment_create(request):
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('appointment_list')
+    else:
+        form = AppointmentForm()
+    return render(request, 'appointment_form.html', {'form': form})

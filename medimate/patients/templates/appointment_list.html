@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment List</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+<nav>
+    <a href="{% url 'patient_list' %}">Patients</a> |
+    <a href="{% url 'appointment_list' %}">Appointments</a> |
+    <a href="{% url 'patient_create' %}">Add Patient</a> |
+    <a href="{% url 'appointment_create' %}">Book Appointment</a>
+</nav>
+
+<div class="container">
+    <h2>Appointment List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for app in appointments %}
+            <tr>
+                <td>{{ app.patient.user }}</td>
+                <td>{{ app.doctor.name }}</td>
+                <td>{{ app.date }}</td>
+                <td>{{ app.time }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4">No appointments found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

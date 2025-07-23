@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,15 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
+    <nav>
+        <a href="{% url 'patient_list' %}">Patients</a> |
+        <a href="{% url 'appointment_list' %}">Appointments</a> |
+        <a href="{% url 'patient_create' %}">Add Patient</a> |
+        <a href="{% url 'appointment_create' %}">Book Appointment</a>
+    </nav>
+
     <div class="container">
         <header class="header">
             <h2>👨‍⚕️ Patient Dashboard</h2>
@@ -47,11 +56,14 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="6">No patients found.</td></tr>
+                    <tr>
+                        <td colspan="6">No patients found.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </body>
+
 </html>

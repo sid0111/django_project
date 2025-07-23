@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,15 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
+
 <body>
+    <nav>
+        <a href="{% url 'patient_list' %}">Patients</a> |
+        <a href="{% url 'appointment_list' %}">Appointments</a> |
+        <a href="{% url 'patient_create' %}">Add Patient</a> |
+        <a href="{% url 'appointment_create' %}">Book Appointment</a>
+    </nav>
+ 
     <div class="container form-container">
         <h2>{% if pat %}Edit{% else %}Add{% endif %} Patient 📝</h2>
         <form method="POST" class="form">
@@ -42,4 +51,5 @@
         </form>
     </div>
 </body>
+
 </html>

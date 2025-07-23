@@ -32,6 +32,29 @@ body {
 h2 {
     font-size: 24px;
     color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Navigation Bar */
+nav {
+    background-color: #007bff;
+    padding: 14px 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+nav a:hover {
+    text-decoration: underline;
 }
 
 /* Table */
@@ -52,7 +75,11 @@ table th {
     font-weight: 600;
 }
 
-table tr:hover {
+table td {
+    background-color: #fff;
+}
+
+table tr:hover td {
     background-color: #f1f1f1;
 }
 
@@ -71,14 +98,21 @@ table tr:hover {
     position: relative;
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 14px 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    background: none;
+    background: white;
     outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
 .form-group label {
@@ -94,7 +128,9 @@ table tr:hover {
 }
 
 .form-group input:focus + label,
-.form-group input:not(:placeholder-shown):not([value=""]) + label {
+.form-group input:not(:placeholder-shown):not([value=""]) + label,
+.form-group textarea:focus + label,
+.form-group select:focus + label {
     top: -10px;
     left: 10px;
     font-size: 12px;
@@ -145,6 +181,27 @@ table tr:hover {
     padding: 20px;
 }
 
+/* Form Layout for Django {{ form.as_p }} */
+form p {
+    margin-bottom: 18px;
+}
+
+form p label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 6px;
+}
+
+form p input,
+form p select,
+form p textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header {
@@ -157,7 +214,14 @@ table tr:hover {
         font-size: 14px;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
         font-size: 14px;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 10px;
     }
 }
