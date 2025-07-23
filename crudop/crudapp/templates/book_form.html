@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Form</title>
+</head>
+<body>
+    <h2>{% if book %} Edit {% else %} Add {% endif %} Book</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label> Title : </label> <input type="text" name="title" value="{{book.title | default:' '}}">
+        <br>
+        <label> Author : </label> <input type="text" name="author" values="{{book.author | default:' '}}">
+        <br>
+        <label> Price : </label> <input type="text" name="price" value="{{book.price | default:''}}">
+        <br>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,38 @@
+pip install django
+django-admin --version
+django-admin
+django-admin startproject mysite
+python manage.py runserver  #python and django colab
+python manage.py runserver 5000 # change local host
+
+
+#we need to migrate first to form the structure of database for predefined apps
+python  manage.py migrate  
+
+#db browser for accessing database
+
+#create super user
+python manage.py createsuperuser
+#nd then enter username, password and email
+
+file structure
+project:
+    apps -
+        views 
+        model
+
+# to acces structure as above
+python manage.py startapp myapp
+
+#then register this app in setting.py, write views and then create urls.py in myapp and provide path
+do changes in both urls
+
+#when we write somethinf in the model we need to migrate and mirgration
+python manage.py makemigrations 
+python manage.py migrate
+
+#then connect model and panel(we are doing this with the admin panel as it bydefult we can also do that with other new panel), update admin.py file
+
+
+question
+1) if we mentioned url in the project url instead of app
