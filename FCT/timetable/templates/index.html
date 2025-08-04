@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgetting Curve Timetable</title>
+    <!-- CSRF Token for Django POST requests -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <!-- Lucide Icons for vector graphics -->
+    <script src="[https://unpkg.com/lucide-react@latest](https://unpkg.com/lucide-react@latest)"></script>
+    <style>
+        @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap)');
+        body { font-family: 'Inter', sans-serif; }
+        /* Add a keyframes for a simple loader animation */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 2s linear infinite;
+        }
+        /* New styles for the notification banner */
+        .notification-banner {
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .notification-banner.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+    <!-- Notification Banner -->
+    <div id="notification-banner" class="fixed top-0 left-0 right-0 z-50 p-4 bg-yellow-400 text-yellow-900 text-center shadow-lg notification-banner">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div id="notification-content" class="flex items-center">
+                <span class="h-6 w-6 mr-2" data-lucide="bell"></span>
+                <span class="font-semibold" id="notification-text"></span>
+            </div>
+            <button id="close-notification" class="p-1 rounded-full text-yellow-900 hover:bg-yellow-500 transition-colors">
+                <span class="h-5 w-5" data-lucide="x"></span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="min-h-screen p-4 sm:p-8 flex flex-col items-center">
+        <div class="w-full max-w-4xl">
+            <!-- Header -->
+            <header class="mb-8 text-center">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">
+                    Combat the Forgetting Curve
+                </h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Enter a topic you've just learned to generate a spaced repetition timetable for effective memory retention.
+                </p>
+            </header>
+
+            <!-- New Topic Form -->
+            <form id="add-topic-form" class="mb-8 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="flex-grow w-full">
+                        <label for="newTopic" class="block text-sm font-medium text-gray-700 mb-1">
+                            New Topic Learned
+                        </label>
+                        <input
+                            id="newTopic"
+                            type="text"
+                            name="name"
+                            placeholder="e.g., 'React Hooks', 'French Revolution', 'Quantum Physics'"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm text-gray-700"
+                        />
+                        <p id="error-message" class="mt-2 text-sm text-red-500 hidden items-center">
+                            <span class="h-4 w-4 inline mr-1" data-lucide="x-circle"></span>
+                            <span id="error-text"></span>
+                        </p>
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-full sm:w-auto flex-shrink-0 px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
+                    >
+                        <span class="h-5 w-5 inline mr-2" data-lucide="plus"></span>
+                        Add Topic
+                    </button>
+                </div>
+            </form>
+
+            <!-- Today's Reviews Section -->
+            <div id="today-reviews-section" class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="h-6 w-6 text-indigo-500 mr-2" data-lucide="star"></span>
+                    Today's Reviews
+                </h2>
+                <div id="today-reviews-list" class="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                    <!-- Today's topics will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <hr class="my-8">
+
+            <!-- All Schedules List -->
+            <main>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="h-6 w-6 text-gray-500 mr-2" data-lucide="list"></span>
+                    All Schedules
+                </h2>
+                <div id="loading-indicator" class="p-10 text-center text-gray-500 bg-white rounded-2xl shadow-inner border border-dashed border-gray-300 hidden">
+                    <span class="h-12 w-12 mx-auto mb-4 text-gray-400 animate-spin-slow" data-lucide="loader-2"></span>
+                    <p class="font-medium text-lg">Loading topics...</p>
+                </div>
+                <div id="no-schedules" class="p-10 text-center text-gray-500 bg-white rounded-2xl shadow-inner border border-dashed border-gray-300">
+                    <span class="h-12 w-12 mx-auto mb-4 text-gray-400" data-lucide="clock"></span>
+                    <p class="font-medium text-lg">No schedules yet.</p>
+                    <p class="text-sm">Add a topic above to create your first review timetable.</p>
+                </div>
+                <div id="all-topics-list" class="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                    <!-- All topics will be dynamically inserted here by JavaScript -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to format dates
+            const formatDate = (date) => {
+                const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+                return new Date(date).toLocaleDateString('en-US', options);
+            };
+
+            // Get the CSRF token from the meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Function to calculate and render the review schedule
+            const renderReviewSchedule = (topic) => {
+                const learnedDate = new Date(topic.learned_date);
+                const dates = [
+                    { label: 'Review 1 (Day 0)', date: formatDate(learnedDate) },
+                    { label: 'Review 2 (Day 1)', date: formatDate(new Date(learnedDate).setDate(learnedDate.getDate() + 1)) },
+                    { label: 'Review 3 (Day 3)', date: formatDate(new Date(learnedDate).setDate(learnedDate.getDate() + 3)) },
+                    { label: 'Review 4 (Day 7)', date: formatDate(new Date(learnedDate).setDate(learnedDate.getDate() + 7)) },
+                    { label: 'Review 5 (Day 30)', date: formatDate(new Date(learnedDate).setDate(learnedDate.getDate() + 30)) },
+                ];
+
+                const cardClass = topic.is_due_today ? 'border-l-4 border-yellow-500' : 'border-l-4 border-indigo-500';
+
+                return `
+                <div class="bg-white p-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${cardClass}" data-topic-id="${topic.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            <span class="h-6 w-6 text-indigo-500 mr-2" data-lucide="book-open"></span>
+                            ${topic.name}
+                        </h3>
+                        <button class="p-1 rounded-full text-gray-400 hover:text-red-500 transition-colors delete-topic" aria-label="Delete schedule" data-topic-id="${topic.id}">
+                            <span class="h-6 w-6" data-lucide="x-circle"></span>
+                        </button>
+                    </div>
+                    <ul class="space-y-3 text-gray-600">
+                        ${dates.map(item => `
+                            <li class="flex items-center space-x-3">
+                                <span class="h-5 w-5 text-indigo-400 flex-shrink-0" data-lucide="calendar"></span>
+                                <div>
+                                    <span class="font-medium text-gray-700">${item.label}:</span> 
+                                    <span class="ml-2 font-mono">${item.date}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                `;
+            };
+            
+            // Function to render today's notification banner
+            const renderNotification = (topics) => {
+                const banner = document.getElementById('notification-banner');
+                const content = document.getElementById('notification-text');
+                if (topics.length > 0) {
+                    const topicNames = topics.map(t => t.name).join(', ');
+                    content.textContent = `You have ${topics.length} topic${topics.length > 1 ? 's' : ''} to review today: ${topicNames}`;
+                    banner.classList.add('show');
+                } else {
+                    banner.classList.remove('show');
+                }
+            };
+            
+            // Close notification button
+            document.getElementById('close-notification').addEventListener('click', () => {
+                document.getElementById('notification-banner').classList.remove('show');
+            });
+
+
+            // Function to fetch and display all topics from the server
+            const fetchTopics = async () => {
+                const allTopicsList = document.getElementById('all-topics-list');
+                const todayReviewsList = document.getElementById('today-reviews-list');
+                const noSchedules = document.getElementById('no-schedules');
+                const loadingIndicator = document.getElementById('loading-indicator');
+                
+                loadingIndicator.classList.remove('hidden');
+                noSchedules.classList.add('hidden');
+                allTopicsList.innerHTML = '';
+                todayReviewsList.innerHTML = '';
+
+                try {
+                    const response = await fetch('/api/topics/');
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    if (data.topics.length === 0) {
+                        noSchedules.classList.remove('hidden');
+                    } else {
+                        const todayTopics = data.topics.filter(topic => topic.is_due_today);
+                        const otherTopics = data.topics.filter(topic => !topic.is_due_today);
+
+                        // Render today's topics
+                        todayTopics.forEach(topic => {
+                            todayReviewsList.innerHTML += renderReviewSchedule(topic);
+                        });
+                        
+                        // Render all other topics
+                        otherTopics.forEach(topic => {
+                            allTopicsList.innerHTML += renderReviewSchedule(topic);
+                        });
+
+                        // Show/hide no schedules message
+                        noSchedules.classList.toggle('hidden', data.topics.length > 0);
+
+                        // Render notification
+                        renderNotification(todayTopics);
+                    }
+                } catch (error) {
+                    console.error('Error fetching topics:', error);
+                    noSchedules.classList.remove('hidden');
+                    noSchedules.innerHTML = '<div class="p-10 text-center text-gray-500 bg-white rounded-2xl shadow-inner border border-dashed border-gray-300"><span class="h-12 w-12 mx-auto mb-4 text-red-400" data-lucide="alert-triangle"></span><p class="font-medium text-lg text-red-500">Failed to load topics.</p><p class="text-sm">Please try again later.</p></div>';
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                    lucide.createIcons(); // Re-create icons after updating content
+                }
+            };
+            
+            // Initial fetch of topics on page load
+            fetchTopics();
+
+            // Dynamic form submission logic
+            const form = document.getElementById('add-topic-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const newTopicInput = document.getElementById('newTopic');
+                const topicName = newTopicInput.value.trim();
+                const errorMessage = document.getElementById('error-message');
+                const errorText = document.getElementById('error-text');
+
+                if (!topicName) {
+                    errorMessage.classList.remove('hidden');
+                    errorText.textContent = 'Please enter a topic name.';
+                    return;
+                } else {
+                    errorMessage.classList.add('hidden');
+                }
+
+                try {
+                    const response = await fetch('/add_topic/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ name: topicName })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        newTopicInput.value = '';
+                        fetchTopics(); // Re-fetch all topics to update the UI
+                    } else {
+                        errorMessage.classList.remove('hidden');
+                        errorText.textContent = data.message || 'Something went wrong.';
+                    }
+                } catch (error) {
+                    console.error('Error adding topic:', error);
+                    errorMessage.classList.remove('hidden');
+                    errorText.textContent = 'Failed to connect to the server.';
+                }
+            });
+
+            // Dynamic deletion logic using event delegation
+            document.getElementById('all-topics-list').addEventListener('click', async (event) => {
+                const deleteButton = event.target.closest('.delete-topic');
+                if (deleteButton) {
+                    const topicId = deleteButton.dataset.topicId;
+                    try {
+                        const response = await fetch(`/delete_topic/${topicId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken
+                            }
+                        });
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            fetchTopics(); // Re-fetch all topics to update the UI
+                        } else {
+                            alert(data.message || 'Failed to delete topic.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting topic:', error);
+                        alert('Failed to connect to the server.');
+                    }
+                }
+            });
+            
+            // Re-fetch logic for today's reviews section
+            document.getElementById('today-reviews-list').addEventListener('click', async (event) => {
+                const deleteButton = event.target.closest('.delete-topic');
+                if (deleteButton) {
+                    const topicId = deleteButton.dataset.topicId;
+                    try {
+                        const response = await fetch(`/delete_topic/${topicId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken
+                            }
+                        });
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            fetchTopics(); // Re-fetch all topics to update the UI
+                        } else {
+                            alert(data.message || 'Failed to delete topic.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting topic:', error);
+                        alert('Failed to connect to the server.');
+                    }
+                }
+            });
+
+            // Initial rendering of icons for static HTML
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
