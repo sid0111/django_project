@@ -1,3 +1,4 @@
+# views.py
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
@@ -9,16 +10,25 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Helper function to check if a topic is due for review today
 def is_due_today(learned_date):
+    """
+    Checks if a topic is due for review based on a spaced repetition schedule.
+    The schedule is:
+    - Day 0 (the day it was learned)
+    - Day 1
+    - Day 3
+    - Day 7
+    - Day 30
+    """
     today = datetime.date.today()
     delta = today - learned_date
     
     # Calculate review days based on the forgetting curve model
+    # Note: Day 0 is the day the topic was learned.
     review_days = [0, 1, 3, 7, 30]
     
     # Check if any review date matches today
-    for day in review_days:
-        if delta.days == day:
-            return True
+    if delta.days in review_days:
+        return True
     return False
 
 def index(request):
@@ -26,6 +36,8 @@ def index(request):
     Renders the main page. This is a regular HTML page load.
     The page will then use JavaScript to fetch the topics.
     """
+    # The CSRF token is automatically added to the context by Django
+    # when using render, as long as the template has {% csrf_token %}
     return render(request, 'index.html')
 
 @csrf_exempt
