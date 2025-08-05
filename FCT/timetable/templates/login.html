@@ -1,0 +1,43 @@
+<!-- timetable/templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        /* Style Django form inputs */
+        input[type="text"], input[type="password"], input[type="email"] {
+            @apply w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm text-gray-700;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-900">Login to Your Account</h2>
+        <form method="post" action="{% url 'user_login' %}" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">Username</label>
+                {{ form.username }}
+            </div>  
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700">Password</label>
+                {{ form.password }}
+            </div>
+            {% if form.errors %}
+                <p class="text-sm text-red-600">Your username and password didn't match. Please try again.</p>
+            {% endif %}
+            <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                Log In
+            </button>
+        </form>
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Don't have an account? <a href="{% url 'register' %}" class="font-medium text-indigo-600 hover:text-indigo-500">Sign up here</a>.
+        </p>
+    </div>
+</body>
+</html>

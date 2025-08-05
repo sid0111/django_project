@@ -1,0 +1,48 @@
+<!-- timetable/templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        /* Style Django form inputs */
+        input[type="text"], input[type="password"], input[type="email"] {
+            @apply w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm text-gray-700;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-900">Create Your Account</h2>
+        <form method="post" action="{% url 'register' %}" class="space-y-6">
+            {% csrf_token %}
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                <div class="text-sm text-red-600">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                Register
+            </button>
+        </form>
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Already have an account? <a href="{% url 'user_login' %}" class="font-medium text-indigo-600 hover:text-indigo-500">Log in here</a>.
+        </p>
+    </div>
+</body>
+</html>

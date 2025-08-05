@@ -51,6 +51,7 @@ def get_topics(request):
     topics_list = []
     for topic in topics:
         topic_dict = model_to_dict(topic)
+        topic_dict['id'] = str(topic.id)
         topic_dict['learned_date'] = topic.learned_date.strftime('%Y-%m-%d')
         topic_dict['is_due_today'] = is_due_today(topic.learned_date)
         topics_list.append(topic_dict)
