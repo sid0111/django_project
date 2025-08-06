@@ -1,5 +1,4 @@
-# views.py
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from .models import Topic
@@ -7,47 +6,39 @@ import json
 import datetime
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 # Helper function to check if a topic is due for review today
 def is_due_today(learned_date):
     """
     Checks if a topic is due for review based on a spaced repetition schedule.
-    The schedule is:
-    - Day 0 (the day it was learned)
-    - Day 1
-    - Day 3
-    - Day 7
-    - Day 30
     """
     today = datetime.date.today()
     delta = today - learned_date
     
-    # Calculate review days based on the forgetting curve model
-    # Note: Day 0 is the day the topic was learned.
     review_days = [0, 1, 3, 7, 30]
     
-    # Check if any review date matches today
-    if delta.days in review_days:
-        return True
-    return False
+    return delta.days in review_days
 
+@login_required(login_url='user_login')
 def index(request):
     """
     Renders the main page. This is a regular HTML page load.
-    The page will then use JavaScript to fetch the topics.
+    The page will then use JavaScript to fetch the topics for the logged-in user.
     """
-    # The CSRF token is automatically added to the context by Django
-    # when using render, as long as the template has {% csrf_token %}
     return render(request, 'index.html')
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@login_required(login_url='user_login')
 def get_topics(request):
     """
-    API endpoint to retrieve all topics. Returns a JSON response
-    with an added 'is_due_today' flag for each topic.
+    API endpoint to retrieve all topics for the logged-in user.
     """
-    topics = Topic.objects.all().order_by('-learned_date')
+    topics = Topic.objects.filter(user=request.user).order_by('-learned_date')
     topics_list = []
     for topic in topics:
         topic_dict = model_to_dict(topic)
@@ -60,10 +51,10 @@ def get_topics(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@login_required(login_url='user_login')
 def add_topic(request):
     """
-    API endpoint to add a new topic.
-    Expects a POST request with a 'name' field in the body.
+    API endpoint to add a new topic for the logged-in user.
     """
     try:
         data = json.loads(request.body)
@@ -71,8 +62,9 @@ def add_topic(request):
         if not topic_name:
             return JsonResponse({'status': 'error', 'message': 'Topic name is required'}, status=400)
         
-        new_topic = Topic.objects.create(name=topic_name)
+        new_topic = Topic.objects.create(name=topic_name, user=request.user)
         new_topic_dict = model_to_dict(new_topic)
+        new_topic_dict['id'] = str(new_topic.id)
         new_topic_dict['learned_date'] = new_topic.learned_date.strftime('%Y-%m-%d')
         new_topic_dict['is_due_today'] = is_due_today(new_topic.learned_date)
         
@@ -85,14 +77,45 @@ def add_topic(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@login_required(login_url='user_login')
 def delete_topic(request, topic_id):
     """
-    API endpoint to delete a topic by ID.
-    Expects a POST request.
+    API endpoint to delete a topic. Ensures the user can only delete their own topics.
     """
     try:
-        topic_to_delete = Topic.objects.get(pk=topic_id)
+        topic_to_delete = Topic.objects.get(pk=topic_id, user=request.user)
         topic_to_delete.delete()
         return JsonResponse({'status': 'success'})
     except Topic.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Topic not found'}, status=404)
+        return JsonResponse({'status': 'error', 'message': 'Topic not found or you do not have permission to delete it'}, status=404)
+
+# --- Authentication Views ---
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+def user_logout(request):
+    logout(request)
+    return redirect('user_login')
