@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        input[type="text"], input[type="email"], input[type="password"] {
+            @apply w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm text-gray-700;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-200">
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-900">User Profile</h2>
+
+        {% if messages %}
+            <ul class="mb-4">
+                {% for message in messages %}
+                <li class="p-3 rounded-lg text-white {% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h3 class="text-xl font-bold mb-4">Edit Profile</h3>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% for field in profile_form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" name="profile_form_submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:bg-indigo-700 transition-all duration-200">
+                Save Profile
+            </button>
+        </form>
+
+        <hr class="my-6">
+
+        <h3 class="text-xl font-bold mb-4">Change Password</h3>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% for field in password_form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" name="password_form_submit" class="w-full py-2.5 bg-red-600 text-white font-semibold rounded-xl shadow-lg hover:bg-red-700 transition-all duration-200">
+                Change Password
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="{% url 'index' %}" class="font-medium text-indigo-600 hover:text-indigo-500">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
