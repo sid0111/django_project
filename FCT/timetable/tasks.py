@@ -5,6 +5,9 @@ from django.utils import timezone
 from .models import Topic
 import datetime
 from .views import get_review_intervals # Re-using your helper function
+from django.contrib.auth.models import User
+
+# ... the rest of your imports and code
 
 @shared_task
 def send_daily_review_reminders():
@@ -18,6 +21,7 @@ def send_daily_review_reminders():
 
     for user_id in users_with_topics:
         user = User.objects.get(id=user_id)
+        print(f"Processing user ID: {user.id}, Username: {user.username}, Email: {user.email}")
         user_intervals = get_review_intervals(user)
         
         # Find topics due for this user today
